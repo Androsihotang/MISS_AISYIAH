@@ -5,6 +5,7 @@ const prestasiRoutes = require("./routes/prestasiRoutes");
 const guruRoutes = require("./routes/guruRoutes");
 const fasilitasRoutes = require("./routes/fasilitasRoutes");
 const galeryRoutes = require("./routes/galeryRoutes");
+const ekskulRoutes = require("./routes/ekskulRoutes");
 const path = require("path");
 const express = require("express");
 const mongoose = require("mongoose");
@@ -20,7 +21,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use(express.static(path.join(__dirname, "public")));
+app.use("/", express.static(path.join(__dirname, "public")));
+app.use("/dashboard", express.static(path.join(__dirname, "public", "dashboard")));
 
 app.use(
     "/uploads",
@@ -36,6 +38,7 @@ app.use("/api/prestasi", prestasiRoutes);
 app.use("/api/guru", guruRoutes);
 app.use("/api/fasilitas", fasilitasRoutes);
 app.use("/api/galery", galeryRoutes);
+app.use("/api/ekskul", ekskulRoutes);
 
 mongoose
   .connect(process.env.MONGODB_URI)
@@ -46,8 +49,13 @@ mongoose
     console.log("❌ MongoDB Error:", err);
   });
 
-app.use((req, res) => {
-    res.sendFile(path.join(__dirname, "public", "index.html"));
+// Fallback untuk Dashboard
+app.use("/dashboard/{*splat}", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "dashboard", "index.html"));
+});
+
+app.use("/{*splat}", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 app.listen(process.env.PORT, () => {
